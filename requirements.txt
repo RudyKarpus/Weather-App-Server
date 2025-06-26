@@ -2,3 +2,5 @@ Django==5.1.0
 django_mongodb_backend==5.1.0b2
 pytest==7.4.3
 python-dotenv==1.1.0
+djangorestframework==3.16.0
+django-cors-headers==4.7.0

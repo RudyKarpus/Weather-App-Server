@@ -27,3 +27,6 @@ ENV/
 .vscode/tasks.json
 .vscode/launch.json
 .vscode/extensions.json
+
+#other
+docker-compose.yml
