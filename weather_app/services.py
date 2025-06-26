@@ -3,7 +3,7 @@ from datetime import datetime, time
 import requests
 from django.core.cache import cache
 
-from .utils import get_timezone, get_timezone_time
+from .utils.time_utils import get_timezone, get_timezone_time
 
 
 class WeatherService:
