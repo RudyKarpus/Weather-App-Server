@@ -1,0 +1,28 @@
+# Python specific
+__pycache__/
+venv/
+env/
+.venv/
+.python-version
+
+# Django
+/media/
+/static/
+/staticfiles/
+
+# Python packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+
+# Virtual environment (specific to Python)
+venv/
+ENV/
+
+# VS Code
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/extensions.json
