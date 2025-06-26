@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .consts import INSTALLATION_POWER_KW, PANEL_EFFICIENCY
-from .utils.weather_utils import get_weekly_weather_data
+from .utils.weather_utils import get_weekly_weather_data, summarize_weather
 
 
 class WeeklyDataView(APIView):
@@ -47,4 +47,21 @@ class WeeklySummaryView(APIView):
                 {"error": "Couldn't get data from api-open-meteo"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        return Response("Summary", status=status.HTTP_200_OK)
+
+        count = len(data["time"])
+        avg_pressure = sum(data["surface_pressure_mean"]) / count
+        avg_sunshine = sum(data["sunshine_duration"]) / count
+        avg_sunshine_hours = round(avg_sunshine / 3600, 2)
+        min_temp = min(data["temperature_2m_min"])
+        max_temp = max(data["temperature_2m_max"])
+        summary = summarize_weather(data["weathercode"])
+
+        response = {
+            "average_pressure": round(avg_pressure, 2),
+            "average_sunshine_hours": avg_sunshine_hours,
+            "min_temperature": min_temp,
+            "max_temperature": max_temp,
+            "weekly_summary": summary,
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
