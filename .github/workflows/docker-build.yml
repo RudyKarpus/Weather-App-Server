@@ -22,7 +22,7 @@ jobs:
         docker build -t server-test .
 
     - name: Run Docker container
-      run:  docker run -d -p 8000:8000  server-test
+      run:  docker run -d --name server-test -p 8000:8000  server-test
 
     - name: Wait for containers to initialize
       run: sleep 10
