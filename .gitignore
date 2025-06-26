@@ -9,6 +9,7 @@ env/
 /media/
 /static/
 /staticfiles/
+db.sqlite3
 
 # Python packaging
 build/
