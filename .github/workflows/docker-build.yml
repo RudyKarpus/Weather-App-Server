@@ -29,7 +29,19 @@ jobs:
 
     - name: Check if server is responding
       run: |
-        curl --fail http://localhost:8000 || (docker logs server-test && exit 1)
+        for i in {1..10}; do
+          echo "Attempt $i: Checking http://localhost:8000"
+          if curl --fail http://localhost:8000; then
+            echo "Server is responding!"
+            exit 0
+          fi
+          echo "Server not responding yet. Waiting 15 seconds..."
+          sleep 15
+        done
+
+        echo "Server did not respond after 10 attempts. Showing logs:"
+        docker logs server-test
+        exit 1
 
     - name: Stop container
       if: always()
