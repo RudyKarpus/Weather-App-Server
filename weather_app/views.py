@@ -7,9 +7,13 @@ from .utils.weather_utils import get_weekly_weather_data, summarize_weather
 
 
 class WeeklyDataView(APIView):
-    def get(self, request):
+    def get(self, request, latitude, longitude):
+        input_data = {
+            "latitude": latitude,
+            "longitude": longitude,
+        }
         try:
-            data = get_weekly_weather_data(request)
+            data = get_weekly_weather_data(input_data)
         except serializers.ValidationError as e:
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
 
@@ -36,9 +40,13 @@ class WeeklyDataView(APIView):
 
 
 class WeeklySummaryView(APIView):
-    def get(self, request):
+    def get(self, request, latitude, longitude):
+        input_data = {
+            "latitude": latitude,
+            "longitude": longitude,
+        }
         try:
-            data = get_weekly_weather_data(request)
+            data = get_weekly_weather_data(input_data)
         except serializers.ValidationError as e:
             return Response(e, status=status.HTTP_400_BAD_REQUEST)
 

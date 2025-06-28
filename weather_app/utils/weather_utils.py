@@ -5,8 +5,8 @@ from ..serializers import LongitudeLatitudeSerializer
 from ..services import WeatherService
 
 
-def get_weekly_weather_data(request):
-    lat_lot_serializer = LongitudeLatitudeSerializer(data=request.data)
+def get_weekly_weather_data(input_data):
+    lat_lot_serializer = LongitudeLatitudeSerializer(data=input_data)
     lat_lot_serializer.is_valid(raise_exception=True)
 
     data = WeatherService.get_weather(

@@ -30,3 +30,4 @@ ENV/
 
 #other
 docker-compose.yml
+.env
