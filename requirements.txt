@@ -6,3 +6,4 @@ djangorestframework==3.16.0
 django-cors-headers==4.7.0
 requests==2.31.0
 timezonefinder==6.5.9
+drf-yasg==1.21.10

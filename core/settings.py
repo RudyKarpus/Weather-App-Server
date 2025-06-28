@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'weather_app.apps.WeatherAppConfig',
     'rest_framework',
     'corsheaders',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [

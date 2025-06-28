@@ -1,3 +1,5 @@
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -7,6 +9,47 @@ from .utils.weather_utils import get_weekly_weather_data, summarize_weather
 
 
 class WeeklyDataView(APIView):
+    @swagger_auto_schema(
+        tags=["Weather Data"],
+        operation_description=(
+            "Get weather weekly data" + "from meteoAPI based on latitude and longitude"
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+                "latitude",
+                openapi.IN_PATH,
+                description="Latitude of location",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "longitude",
+                openapi.IN_PATH,
+                description="Longitude of location",
+                type=openapi.TYPE_STRING,
+            ),
+        ],
+        responses={
+            200: openapi.Response(
+                description="Success response with fetched data",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            "date": openapi.Schema(type=openapi.TYPE_STRING),
+                            "weather_code": openapi.Schema(type=openapi.TYPE_INTEGER),
+                            "temp_min": openapi.Schema(type=openapi.TYPE_NUMBER),
+                            "temp_max": openapi.Schema(type=openapi.TYPE_NUMBER),
+                            "estimated_energy": openapi.Schema(
+                                type=openapi.TYPE_NUMBER
+                            ),
+                        },
+                    ),
+                ),
+            ),
+            400: "Bad request",
+        },
+    )
     def get(self, request, latitude, longitude):
         input_data = {
             "latitude": latitude,
@@ -40,6 +83,45 @@ class WeeklyDataView(APIView):
 
 
 class WeeklySummaryView(APIView):
+    @swagger_auto_schema(
+        tags=["Weather Data"],
+        operation_description=(
+            "Get weather weekly summary data"
+            + "from meteoAPI based on latitude and longitude"
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+                "latitude",
+                openapi.IN_PATH,
+                description="Latitude of location",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "longitude",
+                openapi.IN_PATH,
+                description="Longitude of location",
+                type=openapi.TYPE_STRING,
+            ),
+        ],
+        responses={
+            200: openapi.Response(
+                description="Success response with fetched data",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "average_pressure": openapi.Schema(type=openapi.TYPE_NUMBER),
+                        "average_sunshine_hours": openapi.Schema(
+                            type=openapi.TYPE_NUMBER
+                        ),
+                        "min_temperature": openapi.Schema(type=openapi.TYPE_NUMBER),
+                        "max_temperature": openapi.Schema(type=openapi.TYPE_NUMBER),
+                        "weekly_summary": openapi.Schema(type=openapi.TYPE_STRING),
+                    },
+                ),
+            ),
+            400: "Bad request",
+        },
+    )
     def get(self, request, latitude, longitude):
         input_data = {
             "latitude": latitude,
