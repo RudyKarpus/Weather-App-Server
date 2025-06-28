@@ -5,6 +5,15 @@ nominatim = Nominatim()
 
 
 class LongitudeLatitudeSerializer(serializers.Serializer):
+    """Serializer for validating latitude and longitude
+
+    Args:
+        latitude: geographical latitude
+        longitude: geographical longitude
+
+    Returns:
+        Validaded data of latitude and longitude
+    """
 
     latitude = serializers.FloatField()
     longitude = serializers.FloatField()

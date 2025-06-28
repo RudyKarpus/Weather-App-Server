@@ -6,6 +6,14 @@ from ..services import WeatherService
 
 
 def get_weekly_weather_data(input_data):
+    """Method used accross views to acces WeatherData
+
+    Args:
+        input_data: dict with latitude and longitude
+
+    Returns:
+        Data from meto Api
+    """
     lat_lot_serializer = LongitudeLatitudeSerializer(data=input_data)
     lat_lot_serializer.is_valid(raise_exception=True)
 
@@ -18,6 +26,14 @@ def get_weekly_weather_data(input_data):
 
 
 def summarize_weather(codes):
+    """Utils method for generating weather summary
+
+    Args:
+        code: list of WMO weather codes
+
+    Returns:
+        String summarazing weather
+    """
     categories = [WMO_CODE_CATEGORY.get(code) for code in codes]
     count = Counter(categories)
 

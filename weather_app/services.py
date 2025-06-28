@@ -7,6 +7,17 @@ from .utils.time_utils import get_timezone, get_timezone_time
 
 
 class WeatherService:
+    """Service getting weekly weatcher data
+
+    Args:
+        latitude: geographical latitude
+        longitude: geographical longitude
+
+    Returns:
+        Data from meto Api
+
+    """
+
     @staticmethod
     def get_weather(latitude, longitude):
         cache_key = f"weather-{latitude}-{longitude}"
