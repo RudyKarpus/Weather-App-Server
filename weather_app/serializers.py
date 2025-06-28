@@ -1,7 +1,4 @@
-from OSMPythonTools.nominatim import Nominatim
 from rest_framework import serializers
-
-nominatim = Nominatim()
 
 
 class LongitudeLatitudeSerializer(serializers.Serializer):
