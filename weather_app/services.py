@@ -20,6 +20,9 @@ class WeatherService:
 
     @staticmethod
     def get_weather(latitude, longitude):
+        """
+        Checks wether weather was already checked and cached or gets weather from api
+        """
         cache_key = f"weather-{latitude}-{longitude}"
         data = cache.get(cache_key)
 

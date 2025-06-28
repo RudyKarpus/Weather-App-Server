@@ -1,0 +1,14 @@
+Django==5.1.0
+django_mongodb_backend==5.1.0b2
+pytest==7.4.3
+python-dotenv==1.1.0
+djangorestframework==3.16.0
+django-cors-headers==4.7.0
+requests==2.31.0
+timezonefinder==6.5.9
+drf-yasg==1.21.10
+sphinx
+sphinx_rtd_theme
+drf_yasg
+myst-parser
+sphinxcontrib-openapi

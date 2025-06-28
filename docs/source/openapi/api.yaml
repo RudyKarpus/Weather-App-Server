@@ -1,0 +1,112 @@
+---
+swagger: '2.0'
+info:
+  title: WeatherUpp Rest API
+  description: A backend API for my app with REST APIs
+  version: v1
+host: 127.0.0.1:8000
+schemes:
+- http
+basePath: "/weather/weekly"
+consumes:
+- application/json
+produces:
+- application/json
+securityDefinitions:
+  Basic:
+    type: basic
+security:
+- Basic: []
+paths:
+  "/data/{latitude}/{longitude}/":
+    get:
+      operationId: data_read
+      description: Get weather weekly datafrom meteoAPI based on latitude and longitude
+      parameters:
+      - name: latitude
+        in: path
+        description: Latitude of location
+        type: string
+        required: true
+      - name: longitude
+        in: path
+        description: Longitude of location
+        type: string
+        required: true
+      responses:
+        '200':
+          description: Success response with fetched data
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                date:
+                  type: string
+                weather_code:
+                  type: integer
+                temp_min:
+                  type: number
+                temp_max:
+                  type: number
+                estimated_energy:
+                  type: number
+        '400':
+          description: Bad request
+      tags:
+      - Weather Data
+    parameters:
+    - name: latitude
+      in: path
+      required: true
+      type: string
+    - name: longitude
+      in: path
+      required: true
+      type: string
+  "/summary/{latitude}/{longitude}/":
+    get:
+      operationId: summary_read
+      description: Get weather weekly summary datafrom meteoAPI based on latitude
+        and longitude
+      parameters:
+      - name: latitude
+        in: path
+        description: Latitude of location
+        type: string
+        required: true
+      - name: longitude
+        in: path
+        description: Longitude of location
+        type: string
+        required: true
+      responses:
+        '200':
+          description: Success response with fetched data
+          schema:
+            type: object
+            properties:
+              average_pressure:
+                type: number
+              average_sunshine_hours:
+                type: number
+              min_temperature:
+                type: number
+              max_temperature:
+                type: number
+              weekly_summary:
+                type: string
+        '400':
+          description: Bad request
+      tags:
+      - Weather Data
+    parameters:
+    - name: latitude
+      in: path
+      required: true
+      type: string
+    - name: longitude
+      in: path
+      required: true
+      type: string
+definitions: {}

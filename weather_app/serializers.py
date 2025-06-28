@@ -22,6 +22,9 @@ class LongitudeLatitudeSerializer(serializers.Serializer):
         fields = ["latitude", "longitude"]
 
     def validate(self, attrs):
+        """
+        Validates based on proper latitude and longitude range.
+        """
         latitude = attrs.get("latitude")
         longitude = attrs.get("longitude")
         if latitude > 90 or latitude < -90:
