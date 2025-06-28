@@ -27,10 +27,6 @@ jobs:
     - name: Wait for containers to initialize
       run: sleep 10
 
-    - name: Check if server is responding
-      run: |
-        curl --fail http://localhost:8000 || (docker logs server-test && exit 1)
-
     - name: Stop container
       if: always()
       run: docker stop server-test

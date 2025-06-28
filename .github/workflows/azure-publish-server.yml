@@ -1,0 +1,22 @@
+name: Build and Push Docker server image to ACR
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-client:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to ACR
+        run: echo "${{ secrets.AZURE_CREDENTIALS_PASSWORD }}"  | docker login ${{ secrets.AZURE_CREDENTIALS_USERNAME }}.azurecr.io --username ${{ secrets.AZURE_CREDENTIALS_USERNAME }} --password-stdin
+
+      - name: Build and push image
+        run: |
+          docker build -t ${{ secrets.AZURE_CREDENTIALS_USERNAME }}.azurecr.io/server:latest .
+          docker push ${{ secrets.AZURE_CREDENTIALS_USERNAME }}.azurecr.io/server:latest
