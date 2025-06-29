@@ -1,6 +1,6 @@
 # Weather App server
 **Django server for weather app deployed on azure**<br>
-[Here] (https://weatherupapp-efbkesfae4ggcmeu.uksouth-01.azurewebsites.net/)
+**[Here](https://weatherupapp-efbkesfae4ggcmeu.uksouth-01.azurewebsites.net/)**
 
 
 ## 🚀 Quick Start
