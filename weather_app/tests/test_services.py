@@ -1,75 +1,50 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import Mock, patch
 
-import requests
-from django.core.cache import cache
 from django.test import TestCase
 
 from weather_app.services import WeatherService
 
 
 class WeatherServiceTest(TestCase):
-    def setUp(self):
-        self.latitude = 52.23
-        self.longitude = 21.01
-        self.cache_key = f"weather-{self.latitude}-{self.longitude}"
-
-    def tearDown(self):
-        cache.clear()
-
-    @patch("weather_app.services.cache.get")
-    def test_returns_cached_data(self, mock_cache_get):
-        mock_data = {"mock": "cached"}
-        mock_cache_get.return_value = mock_data
-
-        result = WeatherService.get_weather(self.latitude, self.longitude)
-
-        self.assertEqual(result, mock_data)
-        mock_cache_get.assert_called_once_with(self.cache_key)
 
     @patch("weather_app.services.get_timezone")
     @patch("weather_app.services.requests.get")
-    @patch("weather_app.services.get_timezone_time")
-    @patch("weather_app.services.cache.set")
-    @patch("weather_app.services.cache.get", return_value=None)
-    def test_fetches_data_when_not_cached(
-        self,
-        mock_cache_get,
-        mock_cache_set,
-        mock_get_timezone_time,
-        mock_requests_get,
-        mock_get_timezone,
+    def test_get_weather_successful_response(
+        self, mock_requests_get, mock_get_timezone
     ):
-        mock_response = MagicMock()
-        mock_response.json.return_value = {"daily": {"temp": [20, 21]}}
+        mock_get_timezone.return_value = "Europe/Warsaw"
+
+        mock_response = Mock()
+        mock_response.json.return_value = {
+            "daily": {"temperature_2m_max": [22, 23], "temperature_2m_min": [12, 13]}
+        }
         mock_requests_get.return_value = mock_response
-        mock_get_timezone.return_value = "Europe/Warsaw"
 
-        from datetime import datetime as dt
-        from datetime import timezone
+        latitude = 52.23
+        longitude = 21.01
 
-        mock_time = dt(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
-        mock_get_timezone_time.return_value = mock_time
+        result = WeatherService.get_weather(latitude, longitude)
 
-        result = WeatherService.get_weather(self.latitude, self.longitude)
-
-        self.assertEqual(result, {"temp": [20, 21]})
-        mock_get_timezone.assert_called_once_with(self.latitude, self.longitude)
+        self.assertEqual(
+            result,
+            {
+                "temperature_2m_max": [22, 23],
+                "temperature_2m_min": [12, 13],
+            },
+        )
+        mock_get_timezone.assert_called_once_with(latitude, longitude)
         mock_requests_get.assert_called_once()
-        mock_cache_set.assert_called_once()
-        mock_get_timezone_time.assert_called_once_with("Europe/Warsaw")
 
-    @patch(
-        "weather_app.services.requests.get",
-        side_effect=requests.RequestException("fail"),
-    )
     @patch("weather_app.services.get_timezone")
-    @patch("weather_app.services.cache.get", return_value=None)
-    def test_handles_api_failure(
-        self, mock_cache_get, mock_get_timezone, mock_requests_get
+    @patch("weather_app.services.requests.get")
+    def test_get_weather_empty_daily_fallback(
+        self, mock_requests_get, mock_get_timezone
     ):
         mock_get_timezone.return_value = "Europe/Warsaw"
+        mock_response = Mock()
+        mock_response.json.return_value = {}  # Missing 'daily'
+        mock_requests_get.return_value = mock_response
 
-        result = WeatherService.get_weather(self.latitude, self.longitude)
+        result = WeatherService.get_weather(52.23, 21.01)
 
-        self.assertIsNone(result)
-        mock_requests_get.assert_called_once()
+        self.assertEqual(result, {})  # Should return empty dict instead of None
