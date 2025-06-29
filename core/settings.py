@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 import os
 
 
-
+BASE_DIR = Path(__file__).resolve()
 if os.getenv('WEBSITE_SITE_NAME') is None:
     BASE_DIR = Path(__file__).resolve().parent
     load_dotenv(BASE_DIR / ".env")
