@@ -1,5 +1,6 @@
 # Weather App server
 **Django server for weather app deployed on azure**<br>
+[Here] (https://weatherupapp-efbkesfae4ggcmeu.uksouth-01.azurewebsites.net/)
 
 
 ## 🚀 Quick Start
@@ -8,9 +9,6 @@
 
 * [Python 3.12](https://www.python.org/downloads/)
 * [Docker](https://www.docker.com/)
-* [Rust](https://www.rust-lang.org/tools/install)
-* [Node.js (16+)](https://nodejs.org/)
-* [npm](https://www.npmjs.com/) (bundled with Node.js)
 
 ### Setup Instructions
 
@@ -52,11 +50,11 @@
 1. **Install development dependencies**
 
    ```bash
-   pip install -r requirements-dev.txt
+   pip install -r requirements.txt
    ```
 
 2. **Generate HTML docs**
-   From inside `server/docs`:
+   From inside `/docs`:
 
    **Linux**:
 
