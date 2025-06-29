@@ -130,7 +130,7 @@ class WeeklySummaryView(APIView):
         try:
             data = get_weekly_weather_data(input_data)
         except serializers.ValidationError as e:
-            return Response(e, status=status.HTTP_400_BAD_REQUEST)
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
 
         if data is None:
             return Response(
