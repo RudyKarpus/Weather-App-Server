@@ -72,12 +72,28 @@
            <div itemprop="articleBody">
              
   <h1>Source code for weather_app.services</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">time</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pytime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">contextmanager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">time</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.core.cache</span><span class="w"> </span><span class="kn">import</span> <span class="n">cache</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.utils.time_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_timezone</span><span class="p">,</span> <span class="n">get_timezone_time</span>
+
+
+<div class="viewcode-block" id="cache_lock">
+<a class="viewcode-back" href="../../weather_app_services.html#weather_app.services.cache_lock">[docs]</a>
+<span class="nd">@contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cache_lock</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">lock_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">-lock&quot;</span>
+    <span class="n">acquired</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">lock_id</span><span class="p">,</span> <span class="s2">&quot;locked&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">acquired</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">acquired</span><span class="p">:</span>
+            <span class="n">cache</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">lock_id</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="WeatherService">
@@ -105,34 +121,41 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
-            <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://api.open-meteo.com/v1/forecast&quot;</span>
-            <span class="n">time_zone</span> <span class="o">=</span> <span class="n">get_timezone</span><span class="p">(</span><span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">)</span>
-            <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="n">latitude</span><span class="p">,</span>
-                <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="n">longitude</span><span class="p">,</span>
-                <span class="s2">&quot;daily&quot;</span><span class="p">:</span> <span class="p">[</span>
-                    <span class="s2">&quot;temperature_2m_max&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;temperature_2m_min&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;weathercode&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;sunshine_duration&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;surface_pressure_mean&quot;</span><span class="p">,</span>
-                <span class="p">],</span>
-                <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="n">time_zone</span><span class="p">,</span>
-            <span class="p">}</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="p">{})</span>
-            <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">RequestException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WeatherService: Couldn&#39;t get data from api&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
-                <span class="k">return</span> <span class="kc">None</span>
-            <span class="c1"># Calculate cache time</span>
-            <span class="n">tz_time</span> <span class="o">=</span> <span class="n">get_timezone_time</span><span class="p">(</span><span class="n">time_zone</span><span class="p">)</span>
-            <span class="n">midnight</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">combine</span><span class="p">(</span>
-                <span class="n">tz_time</span><span class="o">.</span><span class="n">date</span><span class="p">(),</span> <span class="n">time</span><span class="p">(</span><span class="mi">23</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">tz_time</span><span class="o">.</span><span class="n">tzinfo</span>
-            <span class="p">)</span>
-            <span class="n">seconds_to_midnight</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">midnight</span> <span class="o">-</span> <span class="n">tz_time</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
+            <span class="k">with</span> <span class="n">cache_lock</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span> <span class="k">as</span> <span class="n">acquired</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">acquired</span><span class="p">:</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
+                        <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://api.open-meteo.com/v1/forecast&quot;</span>
+                        <span class="n">time_zone</span> <span class="o">=</span> <span class="n">get_timezone</span><span class="p">(</span><span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">)</span>
+                        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="n">latitude</span><span class="p">,</span>
+                            <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="n">longitude</span><span class="p">,</span>
+                            <span class="s2">&quot;daily&quot;</span><span class="p">:</span> <span class="p">[</span>
+                                <span class="s2">&quot;temperature_2m_max&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;temperature_2m_min&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;weathercode&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;sunshine_duration&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;surface_pressure_mean&quot;</span><span class="p">,</span>
+                            <span class="p">],</span>
+                            <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="n">time_zone</span><span class="p">,</span>
+                        <span class="p">}</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+                            <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                        <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">RequestException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WeatherService: Couldn&#39;t get data from api&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                            <span class="k">return</span> <span class="kc">None</span>
 
-            <span class="n">cache</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">seconds_to_midnight</span><span class="p">)</span>
+                        <span class="n">tz_time</span> <span class="o">=</span> <span class="n">get_timezone_time</span><span class="p">(</span><span class="n">time_zone</span><span class="p">)</span>
+                        <span class="n">midnight</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">combine</span><span class="p">(</span>
+                            <span class="n">tz_time</span><span class="o">.</span><span class="n">date</span><span class="p">(),</span> <span class="n">time</span><span class="p">(</span><span class="mi">23</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">tz_time</span><span class="o">.</span><span class="n">tzinfo</span>
+                        <span class="p">)</span>
+                        <span class="n">seconds_to_midnight</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">midnight</span> <span class="o">-</span> <span class="n">tz_time</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
+
+                        <span class="n">cache</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">seconds_to_midnight</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">pytime</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 </div>
 
